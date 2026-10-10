@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>گالری عکس من</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: Tahoma, sans-serif;
+    background: #0f0f13;
+    color: #fff;
+    min-height: 100vh;
+  }
+  header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    padding: 25px 20px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  header h1 { font-size: 1.8rem; margin-bottom: 15px; }
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .toolbar input[type="text"] {
+    padding: 10px 15px;
+    border-radius: 25px;
+    border: none;
+    outline: none;
+    font-family: inherit;
+    width: 220px;
+    background: rgba(255,255,255,0.9);
+  }
+  .toolbar button, .toolbar label {
+    padding: 10px 18px;
+    border-radius: 25px;
+    border: none;
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    font-family: inherit;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 0.9rem;
+  }
+  .toolbar button:hover, .toolbar label:hover {
+    background: rgba(255,255,255,0.35);
+    transform: translateY(-2px);
+  }
+  #uploadInput { display: none; }
+  .categories {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    padding: 20px;
+  }
+  .cat-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid #444;
+    background: transparent;
+    color: #ccc;
+    cursor: pointer;
+    font-family: inherit;
+    transition: 0.3s;
+  }
+  .cat-btn.active, .cat-btn:hover {
+    background: #667eea;
+    color: #fff;
+    border-color: #667eea;
+  }
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 15px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px 40px;
+  }
+  .photo-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    cursor: pointer;
+    background: #1a1a22;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    transition: transform 0.3s;
+  }
+  .photo-card:hover { transform: translateY(-5px); }
+  .photo-card img {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s;
+  }
+  .photo-card:hover img { transform: scale(1.08); }
+  .photo-overlay {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(transparent, rgba(0,0,0,0.9));
+    padding: 30px 12px 12px;
+    transform: translateY(100%);
+    transition: transform 0.3s;
+  }
+  .photo-card:hover .photo-overlay { transform: translateY(0); }
+  .photo-overlay p {
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+  }
+  .photo-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .photo-actions button {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+  }
+  .photo-actions button:hover { background: #667eea; }
+  .lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.95);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  .lightbox.active { display: flex; }
+  .lightbox img {
+    max-width: 90%;
+    max-height: 85vh;
+    border-radius: 10px;
+    box-shadow: 0 0 40px rgba(255,255,255,0.2);
+  }
+  .lightbox .close {
+    position: absolute;
+    top: 20px; right: 25px;
+    font-size: 2.5rem;
+    color: #fff;
+    cursor: pointer;
+    background: none;
+    border: none;
+  }
+  .lightbox .nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 2.5rem;
+    color: #fff;
+    background: rgba(255,255,255,0.15);
+    border: none;
+    width: 55px; height: 55px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  .lightbox .nav:hover { background: #667eea; }
+  .lightbox .prev { left: 20px; }
+  .lightbox .next { right: 20px; }
+  .empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: #888;
+    grid-column: 1 / -1;
+  }
+  .empty h3 { font-size: 1.5rem; margin-bottom: 10px; }
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: #667eea;
+    color: #fff;
+    padding: 12px 25px;
+    border-radius: 30px;
+    transition: transform 0.4s;
+    z-index: 2000;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+    max-width: 90%;
+    text-align: center;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  @media (max-width: 600px) {
+    header h1 { font-size: 1.3rem; }
+    .toolbar input[type="text"] { width: 100%; }
+    .gallery { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+    .photo-card img { height: 150px; }
+    .lightbox .nav { width: 45px; height: 45px; font-size: 1.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📸 گالری عکس من</h1>
+  <div class="toolbar">
+    <input type="text" id="searchBox" placeholder="🔍 جستجو در عنوان‌ها...">
+    <label for="uploadInput">➕ افزودن عکس</label>
+    <input type="file" id="uploadInput" accept="image/*" multiple>
+  </div>
+</header>
+
+<div class="categories" id="categories">
+  <button class="cat-btn active" data-cat="all">همه</button>
+  <button class="cat-btn" data-cat="طبیعت">🌿 طبیعت</button>
+  <button class="cat-btn" data-cat="سفر">✈️ سفر</button>
+  <button class="cat-btn" data-cat="خانواده">👨‍👩‍👧 خانواده</button>
+  <button class="cat-btn" data-cat="دیگر">📁 دیگر</button>
+</div>
+
+<div class="gallery" id="gallery">
+  <div class="empty">
+    <h3>در حال بارگذاری...</h3>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox">
+  <button class="close" id="closeLb">×</button>
+  <button class="nav prev" id="prevBtn">‹</button>
+  <img id="lbImg" src="" alt="">
+  <button class="nav next" id="nextBtn">›</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================
+// تنظیمات - اینا رو با اطلاعات خودت عوض کن
+// ============================================
+const GITHUB_USER = 'babakkaba9-sudo';
+const GITHUB_REPO = 'Loplop';
+const GITHUB_TOKEN = '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'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';  // ⚠️ 
+const GITHUB_BRANCH = 'main';
+
+const CLOUD_NAME = 'cytp3ywj';
+const UPLOAD_PRESET = 'Babakupload';
+const CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`;
+
+const GITHUB_API = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents/photos.json`;
+
+// ============================================
+let photos = [];
+let currentCat = 'all';
+let searchTerm = '';
+let lbIndex = 0;
+let photosSha = null;
+
+const gallery = document.getElementById('gallery');
+const lightbox = document.getElementById('lightbox');
+const lbImg = document.getElementById('lbImg');
+const toast = document.getElementById('toast');
+
+// ============================================
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+// ============================================
+// خواندن photos.json از گیت‌هاب
+// ============================================
+async function loadFromGitHub() {
+  try {
+    const res = await fetch(GITHUB_API + '?t=' + Date.now());
+    if (!res.ok) throw new Error('خطا در خواندن');
+    const data = await res.json();
+    photosSha = data.sha;
+    const content = decodeURIComponent(escape(atob(data.content)));
+    photos = JSON.parse(content || '[]');
+    render();
+  } catch (err) {
+    console.error(err);
+    gallery.innerHTML = `
+      <div class="empty">
+        <h3>خطا در بارگذاری</h3>
+        <p>لطفاً صفحه را رفرش کن</p>
+      </div>`;
+  }
+}
+
+// ============================================
+// ذخیره photos.json توی گیت‌هاب
+// ============================================
+async function saveToGitHub() {
+  try {
+    // اول sha جدید رو بگیر
+    const getRes = await fetch(GITHUB_API + '?t=' + Date.now());
+    const getData = await getRes.json();
+    const sha = getData.sha;
+
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(photos, null, 2))));
+
+    const res = await fetch(GITHUB_API, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: 'به‌روزرسانی گالری عکس',
+        content: content,
+        sha: sha,
+        branch: GITHUB_BRANCH
+      })
+    });
+
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.message || 'خطا در ذخیره');
+    }
+
+    return true;
+  } catch (err) {
+    console.error('Save error:', err);
+    throw err;
+  }
+}
+
+// ============================================
+function render() {
+  let filtered = photos.filter(p => {
+    const matchCat = currentCat === 'all' || p.cat === currentCat;
+    const matchSearch = (p.title || '').toLowerCase().includes(searchTerm.toLowerCase());
+    return matchCat && matchSearch;
+  });
+
+  if (filtered.length === 0) {
+    gallery.innerHTML = `
+      <div class="empty">
+        <h3>عکسی پیدا نشد</h3>
+        <p>عکس جدید اضافه کن یا فیلتر رو تغییر بده</p>
+      </div>`;
+    return;
+  }
+
+  gallery.innerHTML = '';
+  filtered.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'photo-card';
+    card.innerHTML = `
+      <img src="${p.url}" alt="${p.title}" loading="lazy">
+      <div class="photo-overlay">
+        <p>${p.title || 'بدون عنوان'}</p>
+        <div class="photo-actions">
+          <button onclick="event.stopPropagation(); deletePhoto('${p.id}')">🗑️ حذف</button>
+        </div>
+      </div>
+    `;
+    card.onclick = () => openLightbox(p.id);
+    gallery.appendChild(card);
+  });
+}
+
+// ============================================
+// آپلود عکس
+// ============================================
+document.getElementById('uploadInput').addEventListener('change', async e => {
+  const files = Array.from(e.target.files);
+  if (!files.length) return;
+
+  for (const file of files) {
+    try {
+      showToast('⏳ در حال آپلود...');
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', UPLOAD_PRESET);
+
+      const res = await fetch(CLOUDINARY_URL, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!res.ok) throw new Error('خطا در آپلود');
+
+      const data = await res.json();
+
+      const title = prompt('عنوان عکس:', file.name.replace(/\.[^/.]+$/, '')) || file.name;
+      const cat = prompt('دسته (طبیعت/سفر/خانواده/دیگر):', 'دیگر') || 'دیگر';
+
+      photos.push({
+        id: data.public_id,
+        url: data.secure_url,
+        title,
+        cat,
+        created: new Date().toISOString()
+      });
+
+      showToast('💾 در حال ذخیره در گیت‌هاب...');
+      await saveToGitHub();
+      render();
+      showToast('✅ عکس ذخیره شد و برای همه قابل دیدنه');
+    } catch (err) {
+      console.error(err);
+      showToast('❌ خطا: ' + err.message);
+    }
+  }
+  e.target.value = '';
+});
+
+// ============================================
+async function deletePhoto(id) {
+  if (!confirm('مطمئنی؟')) return;
+  photos = photos.filter(p => String(p.id) !== String(id));
+  try {
+    showToast('💾 در حال حذف...');
+    await saveToGitHub();
+    render();
+    showToast('🗑️ حذف شد');
+  } catch (err) {
+    showToast('❌ خطا در حذف');
+  }
+}
+
+document.getElementById('searchBox').addEventListener('input', e => {
+  searchTerm = e.target.value;
+  render();
+});
+
+document.getElementById('categories').addEventListener('click', e => {
+  if (!e.target.classList.contains('cat-btn')) return;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  e.target.classList.add('active');
+  currentCat = e.target.dataset.cat;
+  render();
+});
+
+function openLightbox(id) {
+  lbIndex = photos.findIndex(p => String(p.id) === String(id));
+  if (lbIndex < 0) return;
+  lbImg.src = photos[lbIndex].url;
+  lightbox.classList.add('active');
+}
+function closeLightbox() { lightbox.classList.remove('active'); }
+function navLightbox(dir) {
+  lbIndex = (lbIndex + dir + photos.length) % photos.length;
+  lbImg.src = photos[lbIndex].url;
+}
+document.getElementById('closeLb').onclick = closeLightbox;
+document.getElementById('prevBtn').onclick = () => navLightbox(-1);
+document.getElementById('nextBtn').onclick = () => navLightbox(1);
+lightbox.onclick = e => { if (e.target === lightbox) closeLightbox(); };
+
+document.addEventListener('keydown', e => {
+  if (!lightbox.classList.contains('active')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowRight') navLightbox(-1);
+  if (e.key === 'ArrowLeft') navLightbox(1);
+});
+
+// ============================================
+loadFromGitHub();
+</script>
+</body>
+</html>
