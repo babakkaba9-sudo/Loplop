@@ -388,7 +388,10 @@ document.getElementById('uploadInput').addEventListener('change', async e => {
         body: formData
       });
 
-      if (!res.ok) throw new Error('خطا در آپلود');
+      if (!res.ok) {
+  const errText = await res.text();
+  throw new Error('آپلود: ' + errText);
+}
 
       const data = await res.json();
 
