@@ -283,33 +283,29 @@
     transform: scale(1.12);
     filter: saturate(1.3) brightness(1.05);
   }
+
+  /* ===== اطلاعات عکس (ساده و شیک) ===== */
   .photo-info {
-    padding: 15px 15px 18px;
+    padding: 12px 15px;
     background: linear-gradient(to top, #1a1a22, #1e1e28);
     border-top: 1px solid #2a2a33;
     position: relative;
     z-index: 1;
+    text-align: center;
   }
   .photo-info .title {
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 700;
-    margin-bottom: 8px;
-    color: #fff;
+    letter-spacing: 0.5px;
+    background: linear-gradient(135deg, #e0e7ff, #c4b5fd, #a5b4fc);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
-  .photo-info .desc {
-    font-size: 0.9rem;
-    color: #aaa;
-    line-height: 1.6;
-  }
-  .photo-info .desc .heart {
-    color: #ff6b9d;
-    display: inline-block;
-    animation: heartBeat 1.5s ease-in-out infinite;
-  }
-  @keyframes heartBeat {
-    0%, 100% { transform: scale(1); }
-    25% { transform: scale(1.2); }
-    50% { transform: scale(1); }
+  .photo-info .title::before {
+    content: '📷 ';
+    -webkit-text-fill-color: initial;
+    background: none;
   }
 
   /* ===== Lightbox ===== */
@@ -354,10 +350,10 @@
     font-size: 1.2rem;
     font-weight: 700;
     margin-bottom: 8px;
-  }
-  .lightbox .lb-caption .lb-desc {
-    font-size: 0.95rem;
-    color: #bbb;
+    background: linear-gradient(135deg, #e0e7ff, #c4b5fd);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
   .lightbox .close {
     position: absolute;
@@ -430,6 +426,11 @@
     display: inline-block;
     color: #ff6b9d;
     animation: heartBeat 1.5s ease-in-out infinite;
+  }
+  @keyframes heartBeat {
+    0%, 100% { transform: scale(1); }
+    25% { transform: scale(1.2); }
+    50% { transform: scale(1); }
   }
 
   /* ===== دکمه برو بالا ===== */
@@ -533,7 +534,6 @@
     <img id="lbImg" src="" alt="">
     <div class="lb-caption">
       <div class="lb-title" id="lbTitle"></div>
-      <div class="lb-desc" id="lbDesc"></div>
     </div>
   </div>
   <button class="nav next" id="nextBtn">›</button>
@@ -541,14 +541,14 @@
 
 <script>
 const PHOTOS = [
-  { file: '2.jpg', title: 'عکس یادگاری', desc: 'عکس‌های یادگاری رضا تاج و بابک' },
-  { file: '3.jpg', title: 'عکس یادگاری', desc: 'عکس‌های یادگاری رضا تاج و بابک' },
-  { file: '4.jpg', title: 'عکس یادگاری', desc: 'عکس‌های یادگاری رضا تاج و بابک' },
-  { file: '6.jpg', title: 'عکس یادگاری', desc: 'عکس‌های یادگاری رضا تاج و بابک' },
-  { file: '7.jpg', title: 'عکس یادگاری', desc: 'عکس‌های یادگاری رضا تاج و بابک' },
-  { file: '8.jpg', title: 'عکس یادگاری', desc: 'عکس‌های یادگاری رضا تاج و بابک' },
-  { file: '27.jpg', title: 'عکس یادگاری', desc: 'عکس‌های یادگاری رضا تاج و بابک' },
-  { file: '49.jpg', title: 'عکس یادگاری', desc: 'عکس‌های یادگاری رضا تاج و بابک' },
+  { file: '2.jpg', title: 'عکس یادگاری' },
+  { file: '3.jpg', title: 'عکس یادگاری' },
+  { file: '4.jpg', title: 'عکس یادگاری' },
+  { file: '6.jpg', title: 'عکس یادگاری' },
+  { file: '7.jpg', title: 'عکس یادگاری' },
+  { file: '8.jpg', title: 'عکس یادگاری' },
+  { file: '27.jpg', title: 'عکس یادگاری' },
+  { file: '49.jpg', title: 'عکس یادگاری' },
 ];
 
 const BASE_URL = 'https://babakkaba9-sudo.github.io/Loplop/';
@@ -560,14 +560,12 @@ const gallery = document.getElementById('gallery');
 const lightbox = document.getElementById('lightbox');
 const lbImg = document.getElementById('lbImg');
 const lbTitle = document.getElementById('lbTitle');
-const lbDesc = document.getElementById('lbDesc');
 
 function loadPhotos() {
   photos = PHOTOS.map((p, i) => ({
     id: i,
     url: BASE_URL + p.file,
-    title: p.title,
-    desc: p.desc
+    title: p.title
   }));
   render();
 }
@@ -582,7 +580,6 @@ function render() {
       <img src="${p.url}" alt="${p.title}" loading="lazy">
       <div class="photo-info">
         <div class="title">${p.title}</div>
-        <div class="desc"><span class="heart">❤️</span> ${p.desc}</div>
       </div>
     `;
     card.onclick = () => openLightbox(p.id);
@@ -596,7 +593,6 @@ function openLightbox(id) {
   const p = photos[lbIndex];
   lbImg.src = p.url;
   lbTitle.textContent = p.title;
-  lbDesc.textContent = p.desc;
   lightbox.classList.add('active');
 }
 function closeLightbox() { lightbox.classList.remove('active'); }
@@ -605,7 +601,6 @@ function navLightbox(dir) {
   const p = photos[lbIndex];
   lbImg.src = p.url;
   lbTitle.textContent = p.title;
-  lbDesc.textContent = p.desc;
 }
 document.getElementById('closeLb').onclick = closeLightbox;
 document.getElementById('prevBtn').onclick = () => navLightbox(-1);
