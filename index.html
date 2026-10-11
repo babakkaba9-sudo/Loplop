@@ -160,6 +160,51 @@
     grid-column: 1 / -1;
   }
   .empty h3 { font-size: 1.5rem; margin-bottom: 10px; }
+ /* ===== پلیر آهنگ ===== */
+.music-player {
+  max-width: 600px;
+  margin: 25px auto 10px;
+  padding: 18px 22px;
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border: 1px solid #2a2a45;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  box-shadow: 0 6px 25px rgba(102, 126, 234, 0.25);
+}
+.music-icon {
+  font-size: 1.8rem;
+  animation: pulse 1.8s infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+.music-info {
+  flex: 1;
+  min-width: 150px;
+}
+.music-title {
+  font-size: 0.95rem;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 5px;
+}
+.music-player audio {
+  width: 100%;
+  margin-top: 8px;
+  border-radius: 30px;
+  outline: none;
+}
+@media (max-width: 600px) {
+  .music-player {
+    margin: 15px 12px;
+    padding: 14px;
+  }
+  .music-icon { font-size: 1.4rem; }
+}
   footer {
     text-align: center;
     padding: 20px;
