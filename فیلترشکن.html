@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VPN من</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: Tahoma, sans-serif;
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 400px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 24px;
+    padding: 30px 25px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  /* ===== هدر ===== */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+  }
+
+  .header h1 {
+    font-size: 1.3rem;
+    font-weight: bold;
+  }
+
+  .header .logo {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+  }
+
+  /* ===== دکمه اتصال ===== */
+  .connect-area {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .connect-btn {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    color: #fff;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    box-shadow: 0 0 60px rgba(102, 126, 234, 0.5);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 0 auto;
+  }
+
+  .connect-btn .icon {
+    font-size: 2.5rem;
+  }
+
+  .connect-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 80px rgba(102, 126, 234, 0.7);
+  }
+
+  .connect-btn:active {
+    transform: scale(0.98);
+  }
+
+  /* حالت متصل */
+  .connect-btn.connected {
+    background: linear-gradient(135deg, #11998e, #38ef7d);
+    box-shadow: 0 0 60px rgba(56, 239, 125, 0.5);
+  }
+
+  /* حلقه چرخان دور دکمه */
+  .connect-btn.connecting::before {
+    content: '';
+    position: absolute;
+    inset: -10px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    border-top-color: #fff;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .status {
+    margin-top: 20px;
+    font-size: 0.95rem;
+    color: #aaa;
+  }
+
+  .status.connected {
+    color: #38ef7d;
+  }
+
+  /* ===== سرور ===== */
+  .server-section {
+    background: rgba(255,255,255,0.05);
+    border-radius: 16px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: 0.3s;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .server-section:hover {
+    background: rgba(255,255,255,0.1);
+  }
+
+  .server-section .label {
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 5px;
+  }
+
+  .server-section .server-name {
+    font-size: 1rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .server-section .flag {
+    font-size: 1.3rem;
+  }
+
+  .server-section .arrow {
+    color: #666;
+    font-size: 1.2rem;
+  }
+
+  /* ===== آمار ===== */
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-box {
+    background: rgba(255,255,255,0.05);
+    border-radius: 16px;
+    padding: 15px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .stat-box .label {
+    font-size: 0.75rem;
+    color: #888;
+    margin-bottom: 8px;
+  }
+
+  .stat-box .value {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #667eea;
+  }
+
+  .stat-box .unit {
+    font-size: 0.75rem;
+    color: #666;
+    margin-right: 3px;
+  }
+
+  /* ===== دکمه‌ها ===== */
+  .actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .action-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05);
+    color: #fff;
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .action-btn:hover {
+    background: rgba(255,255,255,0.1);
+  }
+
+  /* ===== فوتر ===== */
+  .footer {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 0.75rem;
+    color: #555;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- هدر -->
+  <div class="header">
+    <h1>VPN من</h1>
+    <div class="logo">🔒</div>
+  </div>
+
+  <!-- دکمه اتصال -->
+  <div class="connect-area">
+    <button class="connect-btn" id="connectBtn">
+      <span class="icon">🔌</span>
+      <span>اتصال</span>
+    </button>
+    <div class="status" id="status">آماده برای اتصال</div>
+  </div>
+
+  <!-- انتخاب سرور -->
+  <div class="server-section">
+    <div>
+      <div class="label">سرور انتخاب شده</div>
+      <div class="server-name">
+        <span class="flag">🇩🇪</span>
+        <span>آلمان - فرانکفورت</span>
+      </div>
+    </div>
+    <div class="arrow">‹</div>
+  </div>
+
+  <!-- آمار -->
+  <div class="stats">
+    <div class="stat-box">
+      <div class="label">⬇️ دانلود</div>
+      <div class="value">0 <span class="unit">KB/s</span></div>
+    </div>
+    <div class="stat-box">
+      <div class="label">⬆️ آپلود</div>
+      <div class="value">0 <span class="unit">KB/s</span></div>
+    </div>
+  </div>
+
+  <!-- دکمه‌ها -->
+  <div class="actions">
+    <button class="action-btn">⚙️ تنظیمات</button>
+    <button class="action-btn">📊 آمار</button>
+  </div>
+
+  <!-- فوتر -->
+  <div class="footer">
+    نسخه ۱.۰ • ساخته‌شده توسط بابک
+  </div>
+
+</div>
+
+<script>
+  const btn = document.getElementById('connectBtn');
+  const status = document.getElementById('status');
+  let isConnected = false;
+
+  btn.addEventListener('click', () => {
+    if (!isConnected) {
+      // شروع اتصال
+      btn.classList.add('connecting');
+      btn.querySelector('span:last-child').textContent = 'در حال اتصال...';
+      status.textContent = 'در حال اتصال به سرور...';
+      status.classList.remove('connected');
+
+      // شبیه‌سازی اتصال (بعداً واقعی می‌شه)
+      setTimeout(() => {
+        btn.classList.remove('connecting');
+        btn.classList.add('connected');
+        btn.querySelector('.icon').textContent = '✅';
+        btn.querySelector('span:last-child').textContent = 'قطع';
+        status.textContent = 'متصل به آلمان - فرانکفورت';
+        status.classList.add('connected');
+        isConnected = true;
+      }, 2000);
+    } else {
+      // قطع اتصال
+      btn.classList.remove('connected');
+      btn.querySelector('.icon').textContent = '🔌';
+      btn.querySelector('span:last-child').textContent = 'اتصال';
+      status.textContent = 'آماده برای اتصال';
+      status.classList.remove('connected');
+      isConnected = false;
+    }
+  });
+</script>
+
+</body>
+</html>
